@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forgelens"
+version = "0.1.0"
+description = "AI Dataset & Model Auditor — Remote inspection tool for Hugging Face models and datasets without downloading large files."
+readme = "README.md"
+authors = [
+    { name = "ForgeLens Contributors" }
+]
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.6.0",
+    "typer[all]>=0.9.0",
+    "jinja2>=3.1.3",
+    "langdetect>=1.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.scripts]
+forgelens = "forgelens.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]

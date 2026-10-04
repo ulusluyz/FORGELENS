@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: forgelens
+Version: 0.1.0
+Summary: AI Dataset & Model Auditor — Remote inspection tool for Hugging Face models and datasets without downloading large files.
+Author: ForgeLens Contributors
+License-Expression: MIT
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn[standard]>=0.28.0
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: pydantic>=2.6.0
+Requires-Dist: typer[all]>=0.9.0
+Requires-Dist: jinja2>=3.1.3
+Requires-Dist: langdetect>=1.0.9
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+
+# ForgeLens — AI Dataset & Model Auditor

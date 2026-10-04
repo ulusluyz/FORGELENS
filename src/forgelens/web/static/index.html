@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForgeLens — AI Dataset & Model Auditor</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background-color: #020617;
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+        }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 40px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        h2 { margin-top: 0; font-size: 1.3rem; }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px 14px;
+            background-color: #020617;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+
+        button.btn {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        button.btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .SUITABLE { background-color: var(--success); color: #fff; }
+        .REVIEW_REQUIRED { background-color: var(--warning); color: #000; }
+        .NOT_SUITABLE { background-color: var(--danger); color: #fff; }
+        .INSUFFICIENT_DATA { background-color: #64748b; color: #fff; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th { color: var(--text-secondary); font-size: 0.85rem; }
+
+        pre {
+            background-color: #020617;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="brand">🔍 ForgeLens</div>
+        <div class="nav-link active" onclick="switchTab('dashboard')">Dashboard</div>
+        <div class="nav-link" onclick="switchTab('dataset-audit')">Dataset Audit</div>
+        <div class="nav-link" onclick="switchTab('model-audit')">Model Audit</div>
+        <div class="nav-link" onclick="switchTab('api-manager')">API Manager</div>
+        <div class="nav-link" onclick="switchTab('audit-history')">Audit History</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Dashboard View -->
+        <div id="dashboard" class="view-section active">
+            <h1>ForgeLens Overview</h1>
+            <p style="color: var(--text-secondary);">Remote inspection auditor for Hugging Face models and datasets without binary file downloads.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                <div class="card">
+                    <h2>🔍 Quick Dataset Audit</h2>
+                    <p style="color: var(--text-secondary);">Audit dataset structure, languages, missing values, and duplicates.</p>
+                    <button class="btn" onclick="switchTab('dataset-audit')">Launch Dataset Audit</button>
+                </div>
+                <div class="card">
+                    <h2>🤖 Quick Model Audit</h2>
+                    <p style="color: var(--text-secondary);">Inspect model metadata, architecture, context length, and license.</p>
+                    <button class="btn" onclick="switchTab('model-audit')">Launch Model Audit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dataset Audit View -->
+        <div id="dataset-audit" class="view-section">
+            <h1>Dataset Audit</h1>
+            <div class="card">
+                <div class="form-group">
+                    <label>Hugging Face Dataset Repository (username/dataset-name)</label>
+                    <input type="text" id="ds-repo-id" placeholder="e.g. databricks/databricks-dolly-15k">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Audit Profile</label>
+                        <select id="ds-profile">
+                            <option value="General Dataset">General Dataset</option>
+                            <option value="Turkish LLM Training">Turkish LLM Training</option>
+                            <option value="Instruction Dataset">Instruction Dataset</option>
+                            <option value="Conversation Dataset">Conversation Dataset</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Limit</label>
+                        <input type="number" id="ds-samples" value="1000">
+                    </div>
+                </div>
+                <button class="btn" onclick="runDatasetAudit()">START DATASET AUDIT</button>
+            </div>
+
+            <div id="ds-result-card" class="card" style="display:none;">
+                <h2>Audit Results</h2>
+                <div id="ds-result-content"></div>
+            </div>
+        </div>
+
+        <!-- Model Audit View -->
+        <div id="model-audit" class="view-section">
+            <h1>Model Audit</h1>
+            <div class="card">
+                <div class="form-group">
+                    <label>Hugging Face Model Repository (username/model-name)</label>
+                    <input type="text" id="model-repo-id" placeholder="e.g. meta-llama/Llama-2-7b-hf">
+                </div>
+                <div class="form-group">
+                    <label>Audit Profile</label>
+                    <select id="model-profile">
+                        <option value="General Model Audit">General Model Audit</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="runModelAudit()">START MODEL AUDIT</button>
+            </div>
+
+            <div id="model-result-card" class="card" style="display:none;">
+                <h2>Audit Results</h2>
+                <div id="model-result-content"></div>
+            </div>
+        </div>
+
+        <!-- API Manager View -->
+        <div id="api-manager" class="view-section">
+            <h1>API Manager & Settings</h1>
+            <div class="card">
+                <h2>Configure Provider Credentials</h2>
+                <div class="form-group">
+                    <label>Provider Type</label>
+                    <select id="prov-type">
+                        <option value="openai">OpenAI / OpenAI-Compatible</option>
+                        <option value="huggingface">Hugging Face Token</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>API Key / Token</label>
+                    <input type="text" id="prov-key" placeholder="sk-... or hf_...">
+                </div>
+                <div class="form-group">
+                    <label>Custom Base URL (Optional)</label>
+                    <input type="text" id="prov-base-url" placeholder="https://api.openai.com/v1">
+                </div>
+                <div class="form-group">
+                    <label>Default Model (Optional)</label>
+                    <input type="text" id="prov-model" placeholder="gpt-4o-mini">
+                </div>
+                <button class="btn" onclick="saveProvider()">Save Provider</button>
+            </div>
+
+            <div class="card">
+                <h2>Active Providers</h2>
+                <div id="provider-list-container">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Audit History View -->
+        <div id="audit-history" class="view-section">
+            <h1>Audit History</h1>
+            <div class="card">
+                <div id="history-list-container">Loading history...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'api-manager') loadProviders();
+            if (tabId === 'audit-history') loadHistory();
+        }
+
+        async function runDatasetAudit() {
+            const repoId = document.getElementById('ds-repo-id').value;
+            const profile = document.getElementById('ds-profile').value;
+            const samples = parseInt(document.getElementById('ds-samples').value);
+
+            if (!repoId) return alert('Please enter dataset repo ID.');
+
+            document.getElementById('ds-result-card').style.display = 'block';
+            document.getElementById('ds-result-content').innerHTML = '<p>Running dataset audit (Remote inspection)...</p>';
+
+            try {
+                const res = await fetch('/api/audit/dataset', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({repo_id: repoId, profile_name: profile, sample_size: samples})
+                });
+                const data = await res.json();
+
+                let html = `
+                    <p>Status: <span class="badge ${data.scores.final_status}">${data.scores.final_status}</span> | Score: <strong>${data.scores.weighted_total_score} / 100</strong></p>
+                    <h3>Category Scores</h3>
+                    <table>
+                `;
+                for (const [cat, score] of Object.entries(data.scores.category_scores)) {
+                    html += `<tr><td>${cat}</td><td><strong>${score}</strong> / 100</td></tr>`;
+                }
+                html += `</table><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                document.getElementById('ds-result-content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('ds-result-content').innerHTML = `<p style="color:var(--danger)">Audit failed: ${err}</p>`;
+            }
+        }
+
+        async function runModelAudit() {
+            const repoId = document.getElementById('model-repo-id').value;
+            const profile = document.getElementById('model-profile').value;
+
+            if (!repoId) return alert('Please enter model repo ID.');
+
+            document.getElementById('model-result-card').style.display = 'block';
+            document.getElementById('model-result-content').innerHTML = '<p>Running model audit...</p>';
+
+            try {
+                const res = await fetch('/api/audit/model', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({repo_id: repoId, profile_name: profile})
+                });
+                const data = await res.json();
+
+                let html = `
+                    <p>Status: <span class="badge ${data.scores.final_status}">${data.scores.final_status}</span> | Score: <strong>${data.scores.weighted_total_score} / 100</strong></p>
+                    <br><pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                document.getElementById('model-result-content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('model-result-content').innerHTML = `<p style="color:var(--danger)">Audit failed: ${err}</p>`;
+            }
+        }
+
+        async function loadProviders() {
+            const res = await fetch('/api/providers');
+            const providers = await res.json();
+            let html = '<table><thead><tr><th>Provider</th><th>Model</th><th>Status</th></tr></thead><tbody>';
+            for (const p of providers) {
+                html += `<tr><td>${p.provider_type}</td><td>${p.default_model || 'N/A'}</td><td>${p.is_enabled ? 'Enabled' : 'Disabled'}</td></tr>`;
+            }
+            html += '</tbody></table>';
+            document.getElementById('provider-list-container').innerHTML = html;
+        }
+
+        async function saveProvider() {
+            const pType = document.getElementById('prov-type').value;
+            const pKey = document.getElementById('prov-key').value;
+            const pBase = document.getElementById('prov-base-url').value;
+            const pModel = document.getElementById('prov-model').value;
+
+            await fetch('/api/providers', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    provider_type: pType,
+                    api_key: pKey,
+                    base_url: pBase,
+                    default_model: pModel,
+                    is_enabled: true
+                })
+            });
+            alert('Provider configured successfully!');
+            loadProviders();
+        }
+
+        async function loadHistory() {
+            const res = await fetch('/api/history');
+            const history = await res.json();
+            let html = '<table><thead><tr><th>ID</th><th>Type</th><th>Repository</th><th>Status</th><th>Score</th></tr></thead><tbody>';
+            for (const h of history) {
+                html += `<tr><td>${h.audit_id}</td><td>${h.audit_type}</td><td>${h.repo_id}</td><td><span class="badge ${h.final_status}">${h.final_status}</span></td><td>${h.weighted_total_score}/100</td></tr>`;
+            }
+            html += '</tbody></table>';
+            document.getElementById('history-list-container').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
